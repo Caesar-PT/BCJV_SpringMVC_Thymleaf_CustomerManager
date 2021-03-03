@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/layout :: head">
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+    <input type="text" name="name">
+    <input type="submit" value="Tim Kiem">
+</form>
+<h1>Result: </h1>
+<table th:each="customer:${list1}">
+    <tr>
+        <td th:text="${customer.getName()}"></td>
+        <td th:text="${customer.getEmail()}"></td>
+        <td th:text="${customer.getAddress()}"></td>
+    </tr>
+</table>
+
+<footer th:replace="/layout :: footer"></footer>
+</body>
+</html>
