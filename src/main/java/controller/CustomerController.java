@@ -1,18 +1,20 @@
 package controller;
 
 import model.Customer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import service.CustomerService;
-import service.CustomerServiceImpl;
+
 
 import java.util.List;
 
 @RequestMapping("/customers")
 @Controller
 public class CustomerController {
-    private CustomerService customerService = new CustomerServiceImpl();
+    @Autowired
+    private CustomerService customerService;
 
     @GetMapping("/index")
     public ModelAndView index() {
@@ -49,12 +51,9 @@ public class CustomerController {
     }
 
     @PostMapping("/{id}/edit")
-    public ModelAndView editCustomer(@PathVariable int id, @ModelAttribute Customer customer){
-        ModelAndView modelAndView = new ModelAndView("/index");
-        customerService.update(id, customer);
-
-        List<Customer> customerList = customerService.findAll();
-        modelAndView.addObject("list", customerList);
+    public ModelAndView editCustomer(@ModelAttribute Customer customer){
+        ModelAndView modelAndView = new ModelAndView("redirect:" + "/customers/index");
+        customerService.update(customer);
         return modelAndView;
 
     }
@@ -69,11 +68,9 @@ public class CustomerController {
 
     @PostMapping("{id}/delete")
     public ModelAndView del(@PathVariable int id){
-        ModelAndView modelAndView = new ModelAndView("/index");
-        customerService.remove(id);
-
-        List<Customer> customerList = customerService.findAll();
-        modelAndView.addObject("list", customerList);
+        ModelAndView modelAndView = new ModelAndView("redirect:" + "/customers/index");
+        Customer customer = customerService.findById(id);
+        customerService.remove(customer);
         return modelAndView;
     }
 

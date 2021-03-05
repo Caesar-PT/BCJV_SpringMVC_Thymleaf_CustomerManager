@@ -1,7 +1,13 @@
 package service;
 
 import model.Customer;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.*;
 
 public class CustomerServiceImpl implements CustomerService {
@@ -17,42 +23,101 @@ public class CustomerServiceImpl implements CustomerService {
         customers.put(6, new Customer(6, "Rose", "rose@codegym.vn", "Newyork"));
     }
 
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private SessionFactory sessionFactory;
+
     @Override
     public List<Customer> findAll() {
-        return new ArrayList<>(customers.values());
+        String query = "SELECT c FROM Customer AS c";
+        TypedQuery<Customer> query1 = sessionFactory.openSession().createQuery(query, Customer.class);
+        return query1.getResultList();
     }
 
     @Override
     public void save(Customer customer) {
-        int key = customers.size() + 1;
-        customers.put(key, customer);
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            session.save(customer);
+            transaction.commit();
+            return;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return;
     }
 
     @Override
     public Customer findById(int id) {
-        Customer customer = customers.get(id);
-        return customer;
+        String query = "SELECT c FROM Customer AS c WHERE c.id = :id";
+        TypedQuery<Customer> query1 = entityManager.createQuery(query, Customer.class);
+        query1.setParameter("id", id);
+        return query1.getSingleResult();
     }
 
     @Override
-    public void update(int id, Customer customer) {
-        customers.put(id, customer);
+    public void update(Customer customer) {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            session.update(customer);
+            transaction.commit();
+            return;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return;
     }
 
     @Override
-    public void remove(int id) {
-        customers.remove(id);
+    public void remove(Customer customer) {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            session.delete(customer);
+            transaction.commit();
+            return;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return;
     }
 
     @Override
     public List<Customer> findByName(String name) {
-        List<Customer> customerList = new ArrayList<>(customers.values());
-        List<Customer> result = new ArrayList<>();
-        for (Customer c : customerList) {
-            if (c.getName().equalsIgnoreCase(name)) {
-                result.add(c);
-            }
-        }
-        return result;
+        String query = "SELECT c FROM Customer AS c WHERE c.name = :name";
+        TypedQuery<Customer> query1 = entityManager.createQuery(query, Customer.class);
+        query1.setParameter("name", name);
+        return  query1.getResultList();
     }
 }

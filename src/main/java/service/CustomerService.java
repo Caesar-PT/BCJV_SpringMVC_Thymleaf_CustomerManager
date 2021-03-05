@@ -11,9 +11,9 @@ public interface CustomerService {
 
     Customer findById(int id);
 
-    void update(int id, Customer customer);
+    void update(Customer customer);
 
-    void remove(int id);
+    void remove(Customer customer);
 
     List<Customer> findByName(String name);
 }
