@@ -7,10 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
@@ -27,6 +31,7 @@ import java.util.Properties;
 @Configuration
 @EnableWebMvc
 @ComponentScan("controller")
+@EnableTransactionManagement
 public class AppConfiguration extends WebMvcConfigurerAdapter implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
@@ -80,14 +85,25 @@ public class AppConfiguration extends WebMvcConfigurerAdapter implements Applica
     }
 
     @Bean
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("model");
-        sessionFactory.setHibernateProperties(additionalProperties());
-
-        return sessionFactory;
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean(){
+        LocalContainerEntityManagerFactoryBean c = new LocalContainerEntityManagerFactoryBean();
+        c.setDataSource(dataSource());
+        c.setPackagesToScan("model");
+        JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        c.setJpaVendorAdapter(vendorAdapter);
+        c.setJpaProperties(additionalProperties());
+        return c;
     }
+
+//    @Bean
+//    public LocalSessionFactoryBean sessionFactory() {
+//        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+//        sessionFactory.setDataSource(dataSource());
+//        sessionFactory.setPackagesToScan("model");
+//        sessionFactory.setHibernateProperties(additionalProperties());
+//
+//        return sessionFactory;
+//    }
 
     @Bean
     public DataSource dataSource(){
@@ -97,6 +113,13 @@ public class AppConfiguration extends WebMvcConfigurerAdapter implements Applica
         dataSource.setUsername( "root" );
         dataSource.setPassword( "123456789" );
         return dataSource;
+    }
+
+    @Bean
+    public PlatformTransactionManager platformTransactionManager (EntityManagerFactory managerFactory){
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(managerFactory);
+        return transactionManager;
     }
 
 

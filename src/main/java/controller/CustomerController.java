@@ -68,7 +68,7 @@ public class CustomerController {
 
     @PostMapping("{id}/delete")
     public ModelAndView del(@PathVariable int id){
-        ModelAndView modelAndView = new ModelAndView("redirect:" + "/customers/index");
+        ModelAndView modelAndView = new ModelAndView("redirect:/customers/index");
         Customer customer = customerService.findById(id);
         customerService.remove(customer);
         return modelAndView;
